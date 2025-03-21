@@ -11,8 +11,13 @@ class Database:
     themes: list[Theme] = field(default_factory=list)
 
     @property
+    def next_question_id(self) -> int:
+        return len(self.questions) + 1
+
+    @property
     def next_theme_id(self) -> int:
         return len(self.themes) + 1
 
     def clear(self):
         self.themes.clear()
+        self.questions.clear()
