@@ -5,6 +5,7 @@ from aiohttp_session import get_session
 
 from app.admin.schemes import AdminSchema
 from app.web.app import View
+from app.web.mixins import AuthRequiredMixin
 from app.web.schemes import OkResponseSchema
 from app.web.utils import error_json_response, json_response
 
@@ -45,27 +46,10 @@ class AdminLoginView(View):
         )
 
 
-class AdminCurrentView(View):
+class AdminCurrentView(AuthRequiredMixin, View):
     @response_schema(OkResponseSchema, 200)
     async def get(self):
-        session = await get_session(self.request)
-        admin_id = session.get("admin_id")
-
-        if not admin_id:
-            return error_json_response(
-                http_status=401,
-                status="unauthorized",
-                message="not authenticated"
-            )
-
-        admin = await self.store.admins.get_by_id(admin_id)
-        if not admin:
-            return error_json_response(
-                http_status=401,
-                status="unauthorized",
-                message="admin not found"
-            )
-
+        admin = self.request.admin
         return json_response(
             data={
                 "id": admin.id,

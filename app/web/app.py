@@ -6,7 +6,7 @@ from aiohttp.web import (
     View as AiohttpView,
 )
 from aiohttp_apispec import setup_aiohttp_apispec
-from aiohttp_session import setup
+from aiohttp_session import setup as setup_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from app.admin.models import Admin
@@ -52,13 +52,9 @@ app = Application()
 def setup_app(config_path: str) -> Application:
     setup_logging(app)
     setup_config(app, config_path)
-
-    session_key = app.config.session.key
-    session_key_bytes = base64.b64decode(session_key)
-    setup(app, EncryptedCookieStorage(secret_key=session_key_bytes))
-
+    setup_session(app, EncryptedCookieStorage(app.config.session.key))
     setup_routes(app)
-    setup_aiohttp_apispec(app, title="CRM Application", url="/docs/json", swagger_path="/docs")
+    setup_aiohttp_apispec(app, title="Vk Quiz Bot", url="/docs/json", swagger_path="/docs")
     setup_middlewares(app)
     setup_store(app)
     return app
