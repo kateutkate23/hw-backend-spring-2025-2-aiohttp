@@ -24,6 +24,11 @@ class AdminAccessor(BaseAccessor):
             if admin.email == email:
                 return admin
 
+    async def get_by_id(self, id_: int) -> Admin | None:
+        for admin in self.app.database.admins:
+            if admin.id == id_:
+                return admin
+
     async def create_admin(self, email: str, password: str) -> Admin:
         existing_admin = await self.get_by_email(email)
         if existing_admin:
