@@ -1,3 +1,4 @@
+import hashlib
 import typing
 
 from app.admin.models import Admin
@@ -9,11 +10,26 @@ if typing.TYPE_CHECKING:
 
 class AdminAccessor(BaseAccessor):
     async def connect(self, app: "Application") -> None:
-        # TODO: создать админа по данным в config.yml здесь
-        raise NotImplementedError
+        admin_config = app.config.admin
+
+        email = admin_config.email
+        password = admin_config.password
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        app.database.admins.append(Admin(1, email, hashed_password))
 
     async def get_by_email(self, email: str) -> Admin | None:
-        raise NotImplementedError
+        for admin in self.app.database.admins:
+            if admin.email == email:
+                return admin
 
     async def create_admin(self, email: str, password: str) -> Admin:
-        raise NotImplementedError
+        existing_admin = await self.get_by_email(email)
+        if existing_admin:
+            raise ValueError(f"Admin with email {email} already exists")
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        admin = Admin(len(self.app.database.admins) + 1, email, hashed_password)
+        self.app.database.admins.append(admin)
+        return admin
