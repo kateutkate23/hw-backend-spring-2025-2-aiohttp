@@ -1,6 +1,6 @@
 from aiohttp_apispec import request_schema, response_schema
 
-from app.quiz.schemes import ThemeSchema, QuestionSchema
+from app.quiz.schemes import ThemeSchema, QuestionSchema, ListQuestionSchema
 from app.web.app import View
 from app.web.mixins import AuthRequiredMixin
 from app.web.schemes import OkResponseSchema
@@ -65,6 +65,30 @@ class QuestionAddView(AuthRequiredMixin, View):
         return json_response(data=QuestionSchema().dump(question))
 
 
-class QuestionListView(View):
+class QuestionListView(AuthRequiredMixin, View):
+    @response_schema(OkResponseSchema, 200)
     async def get(self):
-        raise NotImplementedError
+        theme_id_str = self.request.query.get("theme_id")
+
+        if theme_id_str is None:
+            questions = await self.store.quizzes.list_questions()
+        else:
+            theme_id = int(theme_id_str)
+            questions = await self.store.quizzes.list_questions(theme_id=theme_id)
+
+        return json_response(
+            data={
+                "questions": [
+                    {
+                        "id": question.id,
+                        "title": question.title,
+                        "theme_id": question.theme_id,
+                        "answers": [
+                            {"title": answer.title, "is_correct": answer.is_correct}
+                            for answer in question.answers
+                        ]
+                    }
+                    for question in questions
+                ]
+            }
+        )
