@@ -1,9 +1,13 @@
+import base64
+
 from aiohttp.web import (
     Application as AiohttpApplication,
     Request as AiohttpRequest,
     View as AiohttpView,
 )
 from aiohttp_apispec import setup_aiohttp_apispec
+from aiohttp_session import setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from app.admin.models import Admin
 from app.store import Store, setup_store
@@ -48,6 +52,11 @@ app = Application()
 def setup_app(config_path: str) -> Application:
     setup_logging(app)
     setup_config(app, config_path)
+
+    session_key = app.config.session.key
+    session_key_bytes = base64.b64decode(session_key)
+    setup(app, EncryptedCookieStorage(secret_key=session_key_bytes))
+
     setup_routes(app)
     setup_aiohttp_apispec(app, title="CRM Application", url="/docs/json", swagger_path="/docs")
     setup_middlewares(app)

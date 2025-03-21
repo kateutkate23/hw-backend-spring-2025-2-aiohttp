@@ -1,6 +1,7 @@
 import hashlib
 
 from aiohttp_apispec import request_schema, response_schema
+from aiohttp_session import get_session
 
 from app.admin.schemes import AdminSchema
 from app.web.app import View
@@ -31,6 +32,9 @@ class AdminLoginView(View):
                 status="forbidden",
                 message="email or password is incorrect"
             )
+
+        session = await get_session(self.request)
+        session["admin_id"] = admin.id
 
         return json_response(
             data={
