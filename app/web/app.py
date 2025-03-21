@@ -3,6 +3,7 @@ from aiohttp.web import (
     Request as AiohttpRequest,
     View as AiohttpView,
 )
+from aiohttp_apispec import setup_aiohttp_apispec
 
 from app.admin.models import Admin
 from app.store import Store, setup_store
@@ -48,6 +49,7 @@ def setup_app(config_path: str) -> Application:
     setup_logging(app)
     setup_config(app, config_path)
     setup_routes(app)
+    setup_aiohttp_apispec(app, title="CRM Application", url="/docs/json", swagger_path="/docs")
     setup_middlewares(app)
     setup_store(app)
     return app

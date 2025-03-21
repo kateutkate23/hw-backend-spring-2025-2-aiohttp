@@ -1,5 +1,7 @@
-from marshmallow import Schema
+from marshmallow import Schema, fields
+from app.web.schemes import OkResponseSchema
 
 
 class AdminSchema(Schema):
-    pass
+    email = fields.Str(required=True)
+    password = fields.Str(required=True)
