@@ -25,9 +25,16 @@ class ThemeAddView(AuthRequiredMixin, View):
         return json_response(data=ThemeSchema().dump(theme))
 
 
-class ThemeListView(View):
+class ThemeListView(AuthRequiredMixin, View):
+    @response_schema(OkResponseSchema, 200)
     async def get(self):
-        raise NotImplementedError
+        themes = await self.store.quizzes.list_themes()
+
+        return json_response(
+            data={
+                "themes": [{"id": theme.id, "title": theme.title} for theme in themes],
+            }
+        )
 
 
 class QuestionAddView(View):

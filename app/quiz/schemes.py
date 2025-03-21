@@ -15,11 +15,11 @@ class QuestionSchema(Schema):
 
 
 class ThemeListSchema(Schema):
-    pass
+    themes = fields.List(fields.Nested(ThemeSchema), required=True)
 
 
 class ThemeIdSchema(Schema):
-    pass
+    theme_id = fields.Int(required=True)
 
 
 class ListQuestionSchema(Schema):
